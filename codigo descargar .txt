@@ -1,0 +1,36 @@
+LOCAL lcFileID, lcDownloadUrl, lcOutputFile, loHttp
+
+* ID del archivo en Google Drive
+lcFileID = "1Xl9FsnNPvaM8XYw2HqblV6I7GgYAngFC"
+
+* Construcción del enlace de descarga directa
+lcDownloadUrl = "https://drive.google.com/uc?export=download&id=" + lcFileID
+
+* Nombre del archivo de salida
+lcOutputFile = "C:\Novasoft\NovaPOS\Descargas\novapos.exe"  && Cambia la extensión según corresponda
+
+* Crear objeto WinHttp para la descarga
+loHttp = CREATEOBJECT("WinHttp.WinHttpRequest.5.1")
+
+TRY
+    * Configurar y realizar la solicitud HTTP
+    loHttp.Open("GET", lcDownloadUrl, .F.)
+    loHttp.Send()
+
+    * Verificar si la solicitud fue exitosa
+    IF loHttp.Status = 200
+        * Guardar el archivo en el disco
+        STRTOFILE(loHttp.ResponseBody, lcOutputFile)
+
+        * Verificar si el archivo se descargó correctamente
+        IF FILE(lcOutputFile)
+            MESSAGEBOX("Archivo descargado correctamente: " + lcOutputFile, 64, "Éxito")
+        ELSE
+            MESSAGEBOX("No se pudo guardar el archivo.", 16, "Error")
+        ENDIF
+    ELSE
+        MESSAGEBOX("Error al descargar el archivo. Código de estado: " + TRANSFORM(loHttp.Status), 16, "Error")
+    ENDIF
+CATCH TO loError
+    MESSAGEBOX("Error: " + loError.Message, 16, "Excepción")
+ENDTRY
